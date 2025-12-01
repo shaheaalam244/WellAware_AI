@@ -1,0 +1,1 @@
+{"version":3,"file":"LetterGlitch.d.ts","sourceRoot":"","sources":["../src/LetterGlitch.tsx"],"names":[],"mappings":"AAEA,QAAA,MAAM,YAAY,GAAI,uEAMnB;IACD,YAAY,EAAE,MAAM,EAAE,CAAC;IACvB,WAAW,EAAE,MAAM,CAAC;IACpB,cAAc,EAAE,OAAO,CAAC;IACxB,aAAa,EAAE,OAAO,CAAC;IACvB,MAAM,EAAE,OAAO,CAAC;CACjB,4CAwTA,CAAC;AAEF,eAAe,YAAY,CAAC"}

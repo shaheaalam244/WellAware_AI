@@ -1,0 +1,1 @@
+{"version":3,"file":"RollingGallery.d.ts","sourceRoot":"","sources":["../src/RollingGallery.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAsC,MAAM,OAAO,CAAC;AAsB3D,UAAU,mBAAmB;IAC3B,QAAQ,CAAC,EAAE,OAAO,CAAC;IACnB,YAAY,CAAC,EAAE,OAAO,CAAC;IACvB,MAAM,CAAC,EAAE,MAAM,EAAE,CAAC;CACnB;AAED,QAAA,MAAM,cAAc,EAAE,KAAK,CAAC,EAAE,CAAC,mBAAmB,CA0NjD,CAAC;AAEF,eAAe,cAAc,CAAC"}
