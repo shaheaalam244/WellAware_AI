@@ -4,7 +4,9 @@ import "./index.css";
 import Hyperspeed from "./reactbits/Hyperspeed.jsx";
 import Threads from "./reactbits/Threads.jsx";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE;
+
+
 
 function App() {
   const [mode, setMode] = useState("chat");

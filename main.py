@@ -8,42 +8,38 @@ from ml_models import predict_diabetes
 from google import genai
 from google.genai.types import Content, Part
 
-# ============================
-# Load Environment Variables
-# ============================
+
+# ========== Load .env ==========
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY not set in environment variables")
+    raise RuntimeError("GEMINI_API_KEY missing in environment")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# ============================
-# FastAPI App
-# ============================
 app = FastAPI(title="WellAware AI Backend")
 
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
     return {"message": "WellAware AI Backend Running"}
 
 
-# ============================
-# CORS (Allow frontend)
-# ============================
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all frontend URLs
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-# ============================
-# Request Models
-# ============================
+
+# ===== Request Models =====
 class DiabetesInput(BaseModel):
     pregnancies: int = Field(ge=0, le=20)
     glucose: float = Field(ge=0, le=300)
@@ -54,28 +50,16 @@ class DiabetesInput(BaseModel):
     dpf: float = Field(ge=0, le=5)
     age: int = Field(ge=10, le=120)
 
-
 class ChatRequest(BaseModel):
     message: str
-
 
 class ChatResponse(BaseModel):
     reply: str
 
 
-# ============================
-# Health Check
-# ============================
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-
-# ============================
-# Diabetes Prediction Route
-# ============================
+# ===== Diabetes Prediction =====
 @app.post("/predict/diabetes")
-def predict_diabetes_route(data: DiabetesInput):
+def diabetes_route(data: DiabetesInput):
     result, prob = predict_diabetes(
         pregnancies=data.pregnancies,
         glucose=data.glucose,
@@ -96,22 +80,18 @@ def predict_diabetes_route(data: DiabetesInput):
     }
 
 
-# ============================
-# AI Doctor Chat Route
-# ============================
+# ===== AI Doctor Chat =====
 @app.post("/chat", response_model=ChatResponse)
-def chat_with_ai_doctor_route(req: ChatRequest):
+def chat_route(req: ChatRequest):
     user_input = req.message.strip()
+
     if not user_input:
         return ChatResponse(reply="Please enter a valid medical question.")
 
-    # System instruction for AI doctor
     system_instruction = (
         "You are AI Doctor, created by Team ALBATROSS. "
         "Provide medical advice based on standard medical guidelines. "
-        "Refuse non-medical questions politely. "
-        "Respond short, clear, and professional in English or Hinglish. "
-        "Always tell users to consult a real doctor for confirmation."
+        "Always stay short, clear & professional."
     )
 
     contents = [
@@ -119,18 +99,13 @@ def chat_with_ai_doctor_route(req: ChatRequest):
         Content(role="user", parts=[Part(text=user_input)]),
     ]
 
-    # FIXED — correct Gemini API call
     response = client.generate_content(
         model="gemini-2.5-flash",
         contents=contents,
     )
 
-    reply_text = getattr(response, "text", "").strip()
+    reply = getattr(response, "text", "").strip()
+    if not reply:
+        reply = "Unable to answer. Please consult a real doctor."
 
-    if not reply_text:
-        reply_text = (
-            "I'm unable to generate a detailed answer right now. "
-            "Please consult a real doctor for proper medical advice."
-        )
-
-    return ChatResponse(reply=reply_text)
+    return ChatResponse(reply=reply)
