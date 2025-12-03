@@ -8,19 +8,9 @@ from ml_models import predict_diabetes
 from google import genai
 from google.genai import types
 
-# export GEMINI_API_KEY="AIzaSyBaaEQm1J0N0IDARjTFXHhcKgTFh5LaPNE"
 
-# uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-
-# ===== Gemini API key from environment =====
-# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-# if not GEMINI_API_KEY:
-#     raise RuntimeError("GEMINI_API_KEY not set in environment")
-
-# client = genai.Client(api_key=GEMINI_API_KEY)
-
-load_dotenv()  # .env file load karega
+# ===== Load .env =====
+load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -29,19 +19,28 @@ if not GEMINI_API_KEY:
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
+# ===== Create FastAPI App =====
 app = FastAPI(title="WellAware AI Backend")
 
-# ===== CORS so React frontend can call backend =====
+
+# ===== Root Route =====
+@app.get("/")
+def root():
+    return {"message": "WellAware AI Backend Running"}
+
+
+# ===== CORS =====
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # prod me specific domain use karo
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# ===== Request/Response Schemas =====
+# ===== Request Models =====
 class DiabetesInput(BaseModel):
     pregnancies: int = Field(ge=0, le=20)
     glucose: float = Field(ge=0, le=300)
@@ -67,7 +66,7 @@ def health():
     return {"status": "ok"}
 
 
-# ===== Diabetes Prediction Endpoint =====
+# ===== Diabetes Prediction =====
 @app.post("/predict/diabetes")
 def predict_diabetes_route(data: DiabetesInput):
     result, prob = predict_diabetes(
@@ -90,7 +89,7 @@ def predict_diabetes_route(data: DiabetesInput):
     }
 
 
-# ===== Chat with AI Doctor Endpoint =====
+# ===== AI Doctor Chat =====
 @app.post("/chat", response_model=ChatResponse)
 def chat_with_ai_doctor_route(req: ChatRequest):
     user_input = req.message.strip()
